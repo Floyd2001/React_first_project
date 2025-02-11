@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
-
-function UserTable({ users }) {
+function UserTable({ users, sortOrder, onSortAge }) {
     return (
         <table>
             <thead>
@@ -10,7 +9,11 @@ function UserTable({ users }) {
                     <th>Nom</th>
                     <th>Email</th>
                     <th>Tel</th>
-                    <th>Âge</th>
+                    <th>Âge  
+                        <button onClick={onSortAge} >
+                            {sortOrder === "asc" ? "🔼" : sortOrder === "desc" ? "🔽" : "⚪️"}
+                        </button>
+                    </th>
                     <th>Gender</th>
                 </tr>
             </thead>
@@ -30,7 +33,7 @@ function UserTable({ users }) {
     );
 }
 
-function FilterControls({ onFilter, onGenderFilter, onSortAge }) {
+function FilterControls({ onFilter, onGenderFilter }) {
     return (
         <div>
             <input
@@ -44,11 +47,9 @@ function FilterControls({ onFilter, onGenderFilter, onSortAge }) {
                 <option value="female">Female</option>
                 <option value="male">Male</option>
             </select>
-            <button onClick={onSortAge}>Sort by Age</button>
         </div>
     );
 }
-
 
 function App() {
     const [users, setUsers] = useState([]); // Données originales
@@ -56,21 +57,17 @@ function App() {
     const [sortOrder, setSortOrder] = useState('none'); // État du tri
 
     // Récupérer les utilisateurs
-      async function fetchUsers() {
-          try {
-              const response = await fetch('https://randomuser.me/api/?results=20');
-              const { results } = await response.json();
-              setUsers(results);
-            
-              setFilteredUsers(results);
-          } catch (error) {
-              console.error(
-                'Erreur lors de la récupération des utilisateurs :', error);
-          }
-      }}
+    async function fetchUsers() {
+        try {
+            const response = await fetch('https://randomuser.me/api/?results=20');
+            const { results } = await response.json();
+            setUsers(results);
+            setFilteredUsers(results);
+        } catch (error) {
+            console.error('Erreur lors de la récupération des utilisateurs :', error);
+        }
+    }
 
-    console.log({users});
-    
     // Filtrer par nom
     const handleFilter = (input) => {
         const filtered = users.filter(user =>
@@ -92,15 +89,18 @@ function App() {
     // Trier par âge
     const handleSortAge = () => {
         let sortedUsers = [...filteredUsers];
-        if (sortOrder === 'none' || sortOrder === 'desc') {
+        if (sortOrder === "none" ) {
             sortedUsers.sort((a, b) => a.dob.age - b.dob.age);
-            setSortOrder('asc');
-        } else {
+            setSortOrder("asc"); 
+        } else if (sortOrder === "asc") {
             sortedUsers.sort((a, b) => b.dob.age - a.dob.age);
-            setSortOrder('desc');
+            setSortOrder("desc"); 
+        } else {
+            sortedUsers = [...users];
+            setSortOrder("none");
         }
         setFilteredUsers(sortedUsers);
-
+    };
 
     return (
         <div>
@@ -109,9 +109,12 @@ function App() {
             <FilterControls
                 onFilter={handleFilter}
                 onGenderFilter={handleGenderFilter}
+            />
+            <UserTable 
+                users={filteredUsers} 
+                sortOrder={sortOrder}
                 onSortAge={handleSortAge}
             />
-            <UserTable users={filteredUsers} />
         </div>
     );
 }
