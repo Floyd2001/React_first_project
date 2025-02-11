@@ -1,6 +1,54 @@
 import { useState, useEffect } from 'react';
-import UserTable from './Components/usertable';
-import FilterControls from './Components/Filtercontrole';
+
+
+function UserTable({ users }) {
+    return (
+        <table>
+            <thead>
+                <tr>
+                    <th>Photo</th>
+                    <th>Nom</th>
+                    <th>Email</th>
+                    <th>Tel</th>
+                    <th>Âge</th>
+                    <th>Gender</th>
+                </tr>
+            </thead>
+            <tbody>
+                {users.map((user, index) => (
+                    <tr key={index}>
+                        <td><img src={user.picture.thumbnail} alt={`${user.name.first} Photo`} /></td>
+                        <td>{user.name.first} {user.name.last}</td>
+                        <td>{user.email}</td>
+                        <td>{user.phone}</td>
+                        <td>{user.dob.age}</td>
+                        <td>{user.gender === 'male' ? '♂️' : user.gender === 'female' ? '♀️' : '⚧️'}</td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    );
+}
+
+function FilterControls({ onFilter, onGenderFilter, onSortAge }) {
+    return (
+        <div>
+            <input
+                type="text"
+                placeholder="Filter By name"
+                onChange={(e) => onFilter(e.target.value)}
+            />
+            
+            <select onChange={(e) => onGenderFilter(e.target.value)}>
+                <option value="all">All</option>
+                <option value="female">Female</option>
+                <option value="male">Male</option>
+            </select>
+            <button onClick={onSortAge}>Sort by Age</button>
+        </div>
+    );
+}
+
 
 function App() {
     const [users, setUsers] = useState([]); // Données originales
