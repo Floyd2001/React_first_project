@@ -36,6 +36,11 @@ body {
   text-align: center;
 }
 
+.svg-icon {
+  width: 160px;  
+  height: 160px;
+}
+
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
