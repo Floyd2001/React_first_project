@@ -1,8 +1,10 @@
 import { useState } from 'react';
-function UserTable({ users, sortOrder, onSortAge }) {
+import { usePagination } from '@table-library/react-table-library/pagination';
+function UserTable({ users, sortOrder, onSortAge, pagination }) {
     return (
         <div className="container">
             <p>Users Number : {users.length}</p>
+
             <table className="user-table">
 
                 <thead>
@@ -32,6 +34,32 @@ function UserTable({ users, sortOrder, onSortAge }) {
                     ))}
                 </tbody>
             </table>
+            <div
+                style={{ display: 'flex', justifyContent: 'space-between' }}
+            >
+                <span>
+                    Total Pages: {pagination.state.getTotalPages(users)}
+                </span>
+
+                <span>
+                    Page:{' '}
+                    {pagination.state.getPages(users).map((_, index) => (
+                        <button
+                            key={index}
+                            type="button"
+                            style={{
+                                fontWeight:
+                                    pagination.state.page === index
+                                        ? 'bold'
+                                        : 'normal',
+                            }}
+                            onClick={() => pagination.fns.onSetPage(index)}
+                        >
+                            {index + 1}
+                        </button>
+                    ))}
+                </span>
+            </div>
         </div>
     );
 }
@@ -40,6 +68,12 @@ function App() {
     const [users, setUsers] = useState([]); // Données originales
     const [sortOrder, setSortOrder] = useState('none'); // État du tri
     const [genderFilter, setGenderFilter] = useState('all')
+    const pagination = usePagination(users, {
+        state: {
+            page: 0,
+            size: 10,
+        },
+    });
 
     // Récupérer les utilisateurs
     async function fetchUsers() {
@@ -118,6 +152,7 @@ function App() {
                 users={filteredUsers}
                 sortOrder={sortOrder}
                 onSortAge={handleSortAge}
+                pagination={pagination}
             />
         </div>
     );
