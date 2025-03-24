@@ -1,66 +1,44 @@
 import { useState } from 'react';
-import { usePagination } from '@table-library/react-table-library/pagination';
-function UserTable({ users, sortOrder, onSortAge, pagination }) {
+function UserTable({ users, sortOrder, onSortAge, totalUsers }) {
     return (
+
         <div className="container">
-            <p>Users Number : {users.length}</p>
+            <p>Users Number : {totalUsers}</p>
+            <>
+                <table className="user-table">
 
-            <table className="user-table">
-
-                <thead>
-                    <tr>
-                        <th>Photo</th>
-                        <th>Nom</th>
-                        <th>Email</th>
-                        <th>Tel</th>
-                        <th>Âge
-                            <button onClick={onSortAge} >
-                                {sortOrder === "asc" ? "🔼" : sortOrder === "desc" ? "🔽" : "⚪️"}
-                            </button>
-                        </th>
-                        <th>Gender</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {users.map((user, index) => (
-                        <tr key={index} >
-                            <td><img src={user.picture.thumbnail} alt={`${user.name.first} Photo`} /></td>
-                            <td>{user.name.first} {user.name.last}</td>
-                            <td>{user.email}</td>
-                            <td>{user.phone}</td>
-                            <td>{user.dob.age}</td>
-                            <td>{user.gender === 'male' ? '♂️' : user.gender === 'female' ? '♀️' : '⚧️'}</td>
+                    <thead>
+                        <tr>
+                            <th>Photo</th>
+                            <th>Nom</th>
+                            <th>Email</th>
+                            <th>Tel</th>
+                            <th>Âge
+                                <button onClick={onSortAge} >
+                                    {sortOrder === "asc" ? "🔼" : sortOrder === "desc" ? "🔽" : "⚪️"}
+                                </button>
+                            </th>
+                            <th>Gender</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
-            <div
-                style={{ display: 'flex', justifyContent: 'space-between' }}
-            >
-                <span>
-                    Total Pages: {pagination.state.getTotalPages(users)}
-                </span>
+                    </thead>
+                    <tbody>
+                        {users.map((user, index) => (
+                            <tr key={index} >
+                                <td><img src={user.picture.thumbnail} alt={`${user.name.first} Photo`} /></td>
+                                <td>{user.name.first} {user.name.last}</td>
+                                <td>{user.email}</td>
+                                <td>{user.phone}</td>
+                                <td>{user.dob.age}</td>
+                                <td>{user.gender === 'male' ? '♂️' : user.gender === 'female' ? '♀️' : '⚧️'}</td>
+                            </tr>
+                        ))}
+                    </tbody>
 
-                <span>
-                    Page:{' '}
-                    {pagination.state.getPages(users).map((_, index) => (
-                        <button
-                            key={index}
-                            type="button"
-                            style={{
-                                fontWeight:
-                                    pagination.state.page === index
-                                        ? 'bold'
-                                        : 'normal',
-                            }}
-                            onClick={() => pagination.fns.onSetPage(index)}
-                        >
-                            {index + 1}
-                        </button>
-                    ))}
-                </span>
-            </div>
+                </table>
+
+            </>
         </div>
+
     );
 }
 
@@ -68,12 +46,10 @@ function App() {
     const [users, setUsers] = useState([]); // Données originales
     const [sortOrder, setSortOrder] = useState('none'); // État du tri
     const [genderFilter, setGenderFilter] = useState('all')
-    const pagination = usePagination(users, {
-        state: {
-            page: 0,
-            size: 10,
-        },
-    });
+    const [searchInput, setSearchInput] = useState('');
+    const [page, setPage] = useState(1);
+    const itemsPerPage = 10; // Nombre d'items par page
+
 
     // Récupérer les utilisateurs
     async function fetchUsers() {
@@ -99,12 +75,6 @@ function App() {
         }
     }
 
-    // Filtrer par nom
-    const handleFilter = (input) => {
-        const filtered = users.filter(user =>
-            (`${user.name.first} ${user.name.last}`).toLowerCase().includes(input.toLowerCase())
-        );
-    };
 
     // Trier par âge
     const handleSortAge = () => {
@@ -121,6 +91,11 @@ function App() {
 
 
     const filteredUsers = users
+        .filter(user =>
+            `${user.name.first} ${user.name.last}`
+                .toLowerCase()
+                .includes(searchInput.toLowerCase())
+        )//filtrer par nom
         .toSorted((a, b) => {
             if (sortOrder === 'none') return 0;
             return (a.dob.age - b.dob.age) * (sortOrder === 'desc' ? -1 : 1)
@@ -129,6 +104,25 @@ function App() {
             if (genderFilter === 'all') return true
             return user.gender === genderFilter
         })
+
+    // Pagination manuelle
+    const paginatedUsers = filteredUsers.slice(
+        (page - 1) * itemsPerPage,
+        page * itemsPerPage
+    );
+
+    // Gère les changements de page
+    const nextPage = () => {
+        if (page * itemsPerPage < filteredUsers.length) {
+            setPage(p => p + 1);
+        }
+    };
+
+    const prevPage = () => {
+        if (page > 1) {
+            setPage(p => p - 1);
+        }
+    };
 
     return (
         <div>
@@ -139,8 +133,13 @@ function App() {
                 <input
                     type="text"
                     placeholder="Filter By name"
-                    onChange={(e) => onFilter(e.target.value)}
+                    value={searchInput}
+                    onChange={(e) => {
+                        setSearchInput(e.target.value);
+                        setPage(1); // Reset à la page 1 quand on filtre
+                    }}
                 />
+
 
                 <select onChange={(e) => setGenderFilter(e.target.value)} value={genderFilter} >
                     <option value="all">All</option>
@@ -148,13 +147,34 @@ function App() {
                     <option value="male">Male</option>
                 </select>
             </div>
+
             <UserTable
-                users={filteredUsers}
+                users={paginatedUsers}
+                totalUsers={filteredUsers.length}
                 sortOrder={sortOrder}
-                onSortAge={handleSortAge}
-                pagination={pagination}
+                onSortAge={() => {
+                    handleSortAge();
+                    setPage(1); // Reset à la page 1 quand on trie
+                }}
             />
+            <div className="pagination-controls">
+                <button onClick={prevPage} disabled={page === 1}>
+                    Précédent
+                </button>
+
+                <span>
+                    Page {page} / {Math.ceil(filteredUsers.length / itemsPerPage)}
+                </span>
+
+                <button
+                    onClick={nextPage}
+                    disabled={page * itemsPerPage >= filteredUsers.length}
+                >
+                    Suivant
+                </button>
+            </div>
         </div>
+
     );
 }
 
