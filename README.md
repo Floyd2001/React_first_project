@@ -1,5 +1,31 @@
 # React + Vite
 
+
+## 📂 Installation and Launch
+
+### Clone the project
+```sh
+git clone https://github.com/Floyd2001/React_first_project.git
+
+```
+### Install dependencies
+If this is **your first time installing the project**, run the following command to get all the necessary libraries: :
+
+```sh
+npm install
+```
+
+### Start the local server
+To view the resulting page, run:
+
+```sh
+npm run dev
+```
+
+
+
+
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
