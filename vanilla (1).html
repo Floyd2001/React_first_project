@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Vanilla JS Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.fluid.classless.min.css">
+</head>
+
+<body>
+<main>
+    <div>
+        <h1>Vanilla JS Example</h1>
+        <hr>
+        <button id="fetch-users">Fetch Users</button>
+    </div>
+    <table id="tbl-users">
+        <thead>
+        <tr>
+            <th>Photo</th>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Tel</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</main>
+
+<script>
+  async function fetchUsers() {
+    try {
+      const response = await fetch('https://randomuser.me/api/?results=20');
+      const { results } = await response.json();
+
+      const tbody = document.querySelector('#tbl-users tbody');
+      tbody.innerHTML = results.map(user => `
+        <tr>
+            <td><img src="${user.picture.thumbnail}" alt="${user.name.first} Photo"></td>
+            <td>${user.name.first} ${user.name.last}</td>
+            <td>${user.email}</td>
+            <td>${user.phone}</td>
+        </tr>
+    `).join('');
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  }
+
+
+  document.getElementById('fetch-users').addEventListener('click', fetchUsers);
+</script>
+</body>
+</html>
