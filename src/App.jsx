@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 function UserTable({ users, sortOrder, onSortAge, totalUsers }) {
     return (
 
@@ -43,11 +43,22 @@ function UserTable({ users, sortOrder, onSortAge, totalUsers }) {
 }
 
 function App() {
+
+    const [page, setPage] = useState(() => {
+        const params = new URLSearchParams(window.location.search);
+        return parseInt(params.get('page')) || 1;
+    });
+    useEffect(() => {
+        const url = new URL(window.location);
+        url.searchParams.set('page', page);
+        window.history.pushState({}, '', url);
+    }, [page]);
+
+
     const [users, setUsers] = useState([]); // Données originales
     const [sortOrder, setSortOrder] = useState('none'); // État du tri
     const [genderFilter, setGenderFilter] = useState('all')
     const [searchInput, setSearchInput] = useState('');
-    const [page, setPage] = useState(1);
     const itemsPerPage = 10; // Nombre d'items par page
 
 
