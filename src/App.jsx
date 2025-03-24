@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+
+// Next tape caractère spéciaux et storage de la base de données
 function UserTable({ users, sortOrder, onSortAge, totalUsers }) {
     return (
 
@@ -104,13 +106,21 @@ function App() {
     const filteredUsers = users
         .filter(user =>
             `${user.name.first} ${user.name.last}`
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/ø/g, "o")
+                .replace(/å/g, "a")
+                .replace(/ß/g, "ss")
+                .replace(/æ/g, "ae")
+                .replace(/œ/g, "oe")
+                .replace(/Ø/g, "o")
                 .toLowerCase()
                 .includes(searchInput.toLowerCase())
         )//filtrer par nom
         .toSorted((a, b) => {
             if (sortOrder === 'none') return 0;
             return (a.dob.age - b.dob.age) * (sortOrder === 'desc' ? -1 : 1)
-        })
+        })//Par age
         .filter(user => {
             if (genderFilter === 'all') return true
             return user.gender === genderFilter
