@@ -1,9 +1,7 @@
 import { useState } from 'react';
-import myIcon from './assets/react.svg';
 function UserTable({ users, sortOrder, onSortAge }) {
     return (
         <div className="container">
-            <img src={myIcon} alt="React Logo" className="svg-icon" />
             <p>Users Number : {users.length}</p>
             <table className="user-table">
 
@@ -34,7 +32,6 @@ function UserTable({ users, sortOrder, onSortAge }) {
                     ))}
                 </tbody>
             </table>
-            <img src={myIcon} alt="React Logo" className="svg-icon" />
         </div>
     );
 }
@@ -52,6 +49,19 @@ function App() {
             setUsers(results);
         } catch (error) {
             console.error('Erreur lors de la récupération des utilisateurs :', error);
+        }
+    }
+    // Ajouter des utilisateurs
+    async function fetchMoreUsers() {
+        try {
+
+            const response = await fetch('https://randomuser.me/api/?results=10');
+            const { results } = await response.json();
+            setUsers(prevUsers => [...prevUsers, ...results]); //Use of ... for add row instead of add table in table et 
+            // On conserve les anciens et on ajoute les nouveaux
+            // Pas besoin de if vu que une maj d'élémnts avec "=>" sait gérer ça 
+        } catch (error) {
+            console.error('Erreur lors de la récupération des utilisateurs supplémentaires :', error);
         }
     }
 
@@ -90,6 +100,7 @@ function App() {
         <div>
             <h1>React User Table</h1>
             <button onClick={fetchUsers}>Fetch</button>
+            <button onClick={fetchMoreUsers}>Add 10 users</button>
             <div>
                 <input
                     type="text"
