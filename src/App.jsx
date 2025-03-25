@@ -48,7 +48,7 @@ function App() {
 
     const [page, setPage] = useState(() => {
         const params = new URLSearchParams(window.location.search);
-        return parseInt(params.get('page')) || 1;
+        return parseInt(localStorage.getItem('page')) || parseInt(params.get('page')) || 1;
     });
     useEffect(() => {
         const url = new URL(window.location);
@@ -56,8 +56,18 @@ function App() {
         window.history.pushState({}, '', url);
     }, [page]);
 
+    const [users, setUsers] = useState(() => {
+        // Récupère depuis localStorage au chargement
+        const saved = localStorage.getItem('users');
+        return saved ? JSON.parse(saved) : [];
+    });
 
-    const [users, setUsers] = useState([]); // Données originales
+    // Sauvegarde quand les données changent
+    useEffect(() => {
+        localStorage.setItem('users', JSON.stringify(users));
+        localStorage.setItem('page', page);
+    }, [users, page]);
+
     const [sortOrder, setSortOrder] = useState('none'); // État du tri
     const [genderFilter, setGenderFilter] = useState('all')
     const [searchInput, setSearchInput] = useState('');
