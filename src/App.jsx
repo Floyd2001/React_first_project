@@ -45,33 +45,42 @@ function UserTable({ users, sortOrder, onSortAge, totalUsers }) {
 }
 
 function App() {
+    //Fonction pour permettre de mettre tous les states dans l url que ce soit la page ou les filtres
+    function usePersistedState(key, defaultValue) {
+        const [state, setState] = useState(() => {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(key) || localStorage.getItem(key) || defaultValue;
+        });
 
-    const [page, setPage] = useState(() => {
-        const params = new URLSearchParams(window.location.search);
-        return parseInt(localStorage.getItem('page')) || parseInt(params.get('page')) || 1;
-    });
-    useEffect(() => {
-        const url = new URL(window.location);
-        url.searchParams.set('page', page);
-        window.history.pushState({}, '', url);
-    }, [page]);
+        useEffect(() => {
+            localStorage.setItem(key, state);
+            const url = new URL(window.location);
+            url.searchParams.set(key, state);
+            window.history.pushState({}, '', url);
+        }, [key, state]);
 
+        return [state, setState];
+    }
+    // Utilisation :
+    const [page, setPage] = usePersistedState('page', 1);
+    const [genderFilter, setGenderFilter] = usePersistedState('gender', 'all');
+    const [sortOrder, setSortOrder] = usePersistedState('sort', 'none'); // État du tri
+    const [searchInput, setSearchInput] = usePersistedState('search', ' ');
+    const itemsPerPage = 10; // Nombre d'items par page
+
+
+    // Stockage des données 
     const [users, setUsers] = useState(() => {
         // Récupère depuis localStorage au chargement
         const saved = localStorage.getItem('users');
         return saved ? JSON.parse(saved) : [];
     });
-
     // Sauvegarde quand les données changent
     useEffect(() => {
         localStorage.setItem('users', JSON.stringify(users));
         localStorage.setItem('page', page);
     }, [users, page]);
 
-    const [sortOrder, setSortOrder] = useState('none'); // État du tri
-    const [genderFilter, setGenderFilter] = useState('all')
-    const [searchInput, setSearchInput] = useState('');
-    const itemsPerPage = 10; // Nombre d'items par page
 
 
     // Récupérer les utilisateurs
@@ -97,7 +106,6 @@ function App() {
             console.error('Erreur lors de la récupération des utilisateurs supplémentaires :', error);
         }
     }
-
 
     // Trier par âge
     const handleSortAge = () => {
@@ -134,7 +142,7 @@ function App() {
         .filter(user => {
             if (genderFilter === 'all') return true
             return user.gender === genderFilter
-        })
+        })//Par sexe
 
     // Pagination manuelle
     const paginatedUsers = filteredUsers.slice(
