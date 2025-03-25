@@ -1,4 +1,35 @@
 # React + Vite
+* By *Okome Solène Data engineer M2*
+## 📂 Project Overview 
+
+Migrated a vanilla HTML/JS user directory to React, adding advanced data management features while preserving core functionality.
+
+![Screenshot of the page](./screenshots/ui_react.png "Screenshot of the page")
+
+
+## 📂 Key Features  
+
+### View Enhancements
+- Added gender column and replaced text labels with symbols (♂️/♀️/⚧️)
+- Added display of filtered profiles count 
+
+### Data Filtering
+- Search by name (partial match and special characters supported)
+- Filter by gender (male/female/all)
+
+### Sorting
+- Age sorting (ascending/descending)
+- Toggle between sort states with visual indicators
+
+### Pagination
+- 10 results per page 
+- URL synchronization (`?page=2`)
+- Page navigation controls
+
+### Data Management
+- "Load 10 more" button (non-destructive)
+- State persistence on page refresh
+- Shareable URLs preserve all filters
 
 
 ## 📂 Installation and Launch
@@ -21,6 +52,8 @@ To view the resulting page, run:
 ```sh
 npm run dev
 ```
+
+
 
 
 
