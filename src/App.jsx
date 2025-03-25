@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-// Next tape caractère spéciaux et storage de la base de données
+// Composant permettant l'affichage de la liste d'utilisateurs et des boutons de tri.
 function UserTable({ users, sortOrder, onSortAge, totalUsers }) {
     return (
 
@@ -48,23 +48,24 @@ function App() {
     //Fonction pour permettre de mettre tous les states dans l url que ce soit la page ou les filtres
     function usePersistedState(key, defaultValue) {
         const [state, setState] = useState(() => {
+            //Valeur à récupérer
             const params = new URLSearchParams(window.location.search);
             return params.get(key) || localStorage.getItem(key) || defaultValue;
         });
 
+        // Modification dès changement
         useEffect(() => {
             localStorage.setItem(key, state);
             const url = new URL(window.location);
             url.searchParams.set(key, state);
             window.history.pushState({}, '', url);
         }, [key, state]);
-
         return [state, setState];
     }
-    // Utilisation :
+
     const [page, setPage] = usePersistedState('page', 1);
     const [genderFilter, setGenderFilter] = usePersistedState('gender', 'all');
-    const [sortOrder, setSortOrder] = usePersistedState('sort', 'none'); // État du tri
+    const [sortOrder, setSortOrder] = usePersistedState('sort', 'none');
     const [searchInput, setSearchInput] = usePersistedState('search', ' ');
     const itemsPerPage = 10; // Nombre d'items par page
 
@@ -78,12 +79,11 @@ function App() {
     // Sauvegarde quand les données changent
     useEffect(() => {
         localStorage.setItem('users', JSON.stringify(users));
-        localStorage.setItem('page', page);
-    }, [users, page]);
+    }, [users]);
 
 
 
-    // Récupérer les utilisateurs
+    // Récupération des utilisateurs
     async function fetchUsers() {
         try {
             const response = await fetch('https://randomuser.me/api/?results=20');
@@ -93,7 +93,7 @@ function App() {
             console.error('Erreur lors de la récupération des utilisateurs :', error);
         }
     }
-    // Ajouter des utilisateurs
+    // Ajout d'utilisateurs supplémentaires après un fetch sans écraser les anciens
     async function fetchMoreUsers() {
         try {
 
@@ -107,7 +107,8 @@ function App() {
         }
     }
 
-    // Trier par âge
+
+    // Trie par âge
     const handleSortAge = () => {
         if (sortOrder === "none") {
             return setSortOrder("asc");
@@ -134,7 +135,7 @@ function App() {
                 .replace(/Ø/g, "o")
                 .toLowerCase()
                 .includes(searchInput.toLowerCase())
-        )//filtrer par nom
+        )//filtrer par nom en prenant en compte les caractères spéciaux
         .toSorted((a, b) => {
             if (sortOrder === 'none') return 0;
             return (a.dob.age - b.dob.age) * (sortOrder === 'desc' ? -1 : 1)
@@ -144,19 +145,18 @@ function App() {
             return user.gender === genderFilter
         })//Par sexe
 
-    // Pagination manuelle
+    // Sélection du nombre d'utilisateurs sur une page
     const paginatedUsers = filteredUsers.slice(
         (page - 1) * itemsPerPage,
         page * itemsPerPage
     );
 
-    // Gère les changements de page
+    // Gestion de navigation de page
     const nextPage = () => {
         if (page * itemsPerPage < filteredUsers.length) {
             setPage(p => p + 1);
         }
     };
-
     const prevPage = () => {
         if (page > 1) {
             setPage(p => p - 1);
@@ -180,7 +180,13 @@ function App() {
                 />
 
 
-                <select onChange={(e) => setGenderFilter(e.target.value)} value={genderFilter} >
+                <select
+                    value={genderFilter}
+                    onChange={(e) => {
+                        setGenderFilter(e.target.value);
+                        setPage(1) // Reset à la page 1 quand on filtre
+                    }}
+                >
                     <option value="all">All</option>
                     <option value="female">Female</option>
                     <option value="male">Male</option>
@@ -196,6 +202,7 @@ function App() {
                     setPage(1); // Reset à la page 1 quand on trie
                 }}
             />
+
             <div className="pagination-controls">
                 <button onClick={prevPage} disabled={page === 1}>
                     Précédent
